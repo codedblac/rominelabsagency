@@ -1,7 +1,10 @@
+// lib/data/services.ts
+
 export type ServiceFaq = { question: string; answer: string }
 
 export type Service = {
   slug: string
+  href: string
   title: string
   discipline: string
   tagline: string
@@ -44,17 +47,7 @@ export const disciplines: Discipline[] = [
       'High-performance digital experiences designed around your business, your audience and your goals.',
     cta: 'Explore Web & Digital',
     primarySlug: 'web-development',
-    services: [
-      'Website Development',
-      'Corporate Websites',
-      'Landing Pages',
-      'E-commerce Development',
-      'Custom Web Applications',
-      'Website Redesign',
-      'Website Maintenance',
-      'Performance Optimization',
-      'Conversion-Focused Websites',
-    ],
+    services: [],
   },
   {
     id: 'growth-performance',
@@ -66,16 +59,9 @@ export const disciplines: Discipline[] = [
     primarySlug: 'seo',
     services: [
       'SEO',
-      'Local SEO',
-      'Technical SEO',
-      'Google Business Profile',
-      'Google Ads',
-      'Meta Ads',
-      'YouTube Ads',
       'Paid Media Strategy',
+      'Analytics & Tracking',
       'Conversion Rate Optimization',
-      'Competitor Research',
-      'Digital Marketing Strategy',
     ],
   },
   {
@@ -86,17 +72,7 @@ export const disciplines: Discipline[] = [
       'Turn expertise, ideas and long-form content into a consistent digital presence people remember.',
     cta: 'Explore Social & Content',
     primarySlug: 'social-media',
-    services: [
-      'Social Media Management',
-      'Instagram / TikTok / LinkedIn',
-      'YouTube & Shorts',
-      'Content Repurposing',
-      'Short-Form Video',
-      'Video Editing',
-      'Community Management',
-      'Social SEO',
-      'Audience Research',
-    ],
+    services: ['Social Media Management', 'Content Production'],
   },
   {
     id: 'lead-generation',
@@ -106,17 +82,7 @@ export const disciplines: Discipline[] = [
       'Build systems that turn attention into qualified leads, conversations and customers.',
     cta: 'Explore Lead Generation',
     primarySlug: 'lead-generation',
-    services: [
-      'Lead Generation',
-      'Sales Funnels',
-      'Lead Capture & Qualification',
-      'Appointment Setting',
-      'CRM Setup & Management',
-      'Email & SMS Marketing',
-      'Automated Follow-Up',
-      'Retargeting',
-      'Conversion Optimization',
-    ],
+    services: ['Lead Generation', 'CRM & Automation', 'Email Marketing'],
   },
   {
     id: 'ai-automation',
@@ -126,26 +92,17 @@ export const disciplines: Discipline[] = [
       'Use intelligent systems to reduce repetitive work, respond faster and scale operations.',
     cta: 'Explore AI & Automation',
     primarySlug: 'ai-automation',
-    services: [
-      'AI Chatbots',
-      'AI Customer Support',
-      'AI Lead Qualification',
-      'AI Appointment Booking',
-      'CRM & Workflow Automation',
-      'Email & SMS Automation',
-      'AI Content Workflows',
-      'Reporting Automation',
-      'Business Process Automation',
-    ],
+    services: [],
   },
   {
     id: 'analytics-optimization',
     number: '06',
     title: 'Analytics & Optimization',
-    description: 'Make better decisions with measurement systems that reveal what is working and where to improve.',
+    description:
+      'Make better decisions with measurement systems that reveal what is working and where to improve.',
     cta: 'Explore Analytics',
     primarySlug: 'analytics',
-    services: ['Analytics & Tracking', 'Dashboard Design', 'Conversion Rate Optimization', 'Funnel Analysis', 'Reporting Automation', 'Experimentation'],
+    services: [],
   },
   {
     id: 'brand-creative',
@@ -155,17 +112,7 @@ export const disciplines: Discipline[] = [
       'Build a visual identity and creative system that makes your business impossible to confuse.',
     cta: 'Explore Brand & Creative',
     primarySlug: 'brand-creative',
-    services: [
-      'Brand Strategy',
-      'Logo & Visual Identity',
-      'Brand Guidelines',
-      'Graphic & Social Creative',
-      'Presentation & Print Design',
-      'Advertising Creative',
-      'Video Production',
-      'Corporate & Promo Video',
-      'Creative Campaigns',
-    ],
+    services: [],
   },
 ]
 
@@ -187,7 +134,7 @@ const genericFaqs = (name: string): ServiceFaq[] => [
   },
 ]
 
-const baseServices: Service[] = [
+const baseServices: Omit<Service, 'href'>[] = [
   {
     slug: 'web-development',
     title: 'Web Development',
@@ -232,7 +179,7 @@ const baseServices: Service[] = [
       },
       ...genericFaqs('web development').slice(1),
     ],
-    related: ['conversion-optimization', 'seo', 'brand-creative'],
+    related: ['conversion-rate-optimization', 'seo', 'brand-creative'],
     image: '/images/insight-web.png',
   },
   {
@@ -279,12 +226,12 @@ const baseServices: Service[] = [
       },
       ...genericFaqs('SEO').slice(1),
     ],
-    related: ['paid-advertising', 'analytics', 'conversion-optimization'],
+    related: ['paid-media-strategy', 'analytics', 'conversion-rate-optimization'],
     image: '/images/insight-seo.png',
   },
   {
-    slug: 'paid-advertising',
-    title: 'Paid Advertising',
+    slug: 'paid-media-strategy',
+    title: 'Paid Media Strategy',
     discipline: 'Growth & Performance',
     tagline: 'Predictable demand from Google, Meta and YouTube.',
     summary:
@@ -318,8 +265,8 @@ const baseServices: Service[] = [
       'Clear performance reporting',
     ],
     engagement: 'Custom engagement — management fee plus your ad budget.',
-    faqs: genericFaqs('paid advertising'),
-    related: ['seo', 'conversion-optimization', 'analytics'],
+    faqs: genericFaqs('paid media strategy'),
+    related: ['seo', 'conversion-rate-optimization', 'analytics'],
     image: '/images/work-growth.png',
   },
   {
@@ -366,7 +313,7 @@ const baseServices: Service[] = [
       },
       ...genericFaqs('social media').slice(1),
     ],
-    related: ['content-production', 'brand-creative', 'paid-advertising'],
+    related: ['content-production', 'brand-creative', 'paid-media-strategy'],
     image: '/images/work-social.png',
   },
   {
@@ -446,7 +393,7 @@ const baseServices: Service[] = [
     ],
     engagement: 'Custom engagement — build plus ongoing optimization.',
     faqs: genericFaqs('lead generation'),
-    related: ['crm-automation', 'email-marketing', 'conversion-optimization'],
+    related: ['crm-automation', 'email-marketing', 'conversion-rate-optimization'],
     image: '/images/work-ecommerce.png',
   },
   {
@@ -588,9 +535,6 @@ const baseServices: Service[] = [
       'Brand strategy and positioning',
       'Logo and visual identity design',
       'Brand guidelines and systems',
-      'Graphic, social and ad creative',
-      'Presentation and print design',
-      'Creative campaign concepts',
     ],
     approach: [
       { title: 'Discover', body: 'We understand your positioning, audience and market.' },
@@ -646,11 +590,11 @@ const baseServices: Service[] = [
     ],
     engagement: 'Custom engagement — setup plus optional reporting.',
     faqs: genericFaqs('analytics'),
-    related: ['seo', 'paid-advertising', 'conversion-optimization'],
+    related: ['seo', 'paid-media-strategy', 'conversion-rate-optimization'],
     image: '/images/hero-data.png',
   },
   {
-    slug: 'conversion-optimization',
+    slug: 'conversion-rate-optimization',
     title: 'Conversion Optimization',
     discipline: 'Growth & Performance',
     tagline: 'Get more from the traffic you already have.',
@@ -691,52 +635,87 @@ const baseServices: Service[] = [
   },
 ]
 
-const disciplineContext: Record<string, Pick<Service, 'capabilities' | 'audiences' | 'technology' | 'outcomes'>> = {
+const disciplineContext: Record<
+  string,
+  Pick<Service, 'capabilities' | 'audiences' | 'technology' | 'outcomes'>
+> = {
   'Web & Digital': {
-    capabilities: [{ title: 'Strategy and structure', body: 'Clear information architecture and page systems built around how people decide.' }, { title: 'Design and development', body: 'Accessible, responsive experiences with the performance fundamentals in place.' }, { title: 'Measurement and iteration', body: 'A practical handoff that makes future improvements easier to prioritize.' }],
+    capabilities: [
+      { title: 'Strategy and structure', body: 'Clear information architecture and page systems built around how people decide.' },
+      { title: 'Design and development', body: 'Accessible, responsive experiences with the performance fundamentals in place.' },
+      { title: 'Measurement and iteration', body: 'A practical handoff that makes future improvements easier to prioritize.' },
+    ],
     audiences: ['Growing service businesses', 'Teams with an outdated or fragmented digital presence'],
     technology: ['Modern responsive web standards', 'CMS and analytics-aware implementation'],
     outcomes: ['Clearer positioning', 'A stronger path to inquiry or purchase', 'A maintainable digital foundation'],
   },
   'Growth & Performance': {
-    capabilities: [{ title: 'Demand research', body: 'Understand the questions, intent, and competitive context around your offer.' }, { title: 'Acquisition systems', body: 'Build focused search and campaign foundations that can be measured.' }, { title: 'Continuous improvement', body: 'Use evidence from performance to decide what to adjust next.' }],
+    capabilities: [
+      { title: 'Demand research', body: 'Understand the questions, intent, and competitive context around your offer.' },
+      { title: 'Acquisition systems', body: 'Build focused search and campaign foundations that can be measured.' },
+      { title: 'Continuous improvement', body: 'Use evidence from performance to decide what to adjust next.' },
+    ],
     audiences: ['Businesses ready to make visibility more intentional', 'Teams with traffic but inconsistent conversion'],
     technology: ['Search and campaign platforms', 'Analytics and conversion measurement'],
     outcomes: ['Better qualified attention', 'More useful reporting', 'A clearer optimization backlog'],
   },
   'Social & Content': {
-    capabilities: [{ title: 'Editorial direction', body: 'Turn expertise and ideas into a repeatable point of view.' }, { title: 'Creative systems', body: 'Create formats that are recognizable without making every post from scratch.' }, { title: 'Publishing rhythm', body: 'Build a sustainable operating model for content and community.' }],
+    capabilities: [
+      { title: 'Editorial direction', body: 'Turn expertise and ideas into a repeatable point of view.' },
+      { title: 'Creative systems', body: 'Create formats that are recognizable without making every post from scratch.' },
+      { title: 'Publishing rhythm', body: 'Build a sustainable operating model for content and community.' },
+    ],
     audiences: ['Founder-led and expertise-driven brands', 'Teams that need more consistency across channels'],
     technology: ['Platform-native publishing workflows', 'Content planning and reporting systems'],
     outcomes: ['More consistent presence', 'Reusable creative direction', 'A stronger connection with the right audience'],
   },
   'Lead Generation & Sales': {
-    capabilities: [{ title: 'Funnel design', body: 'Connect the offer, message, and next step into a coherent journey.' }, { title: 'Lead operations', body: 'Make qualification, routing, and follow-up easier for your team.' }, { title: 'Conversion learning', body: 'Identify where interest turns into momentum — or falls away.' }],
+    capabilities: [
+      { title: 'Funnel design', body: 'Connect the offer, message, and next step into a coherent journey.' },
+      { title: 'Lead operations', body: 'Make qualification, routing, and follow-up easier for your team.' },
+      { title: 'Conversion learning', body: 'Identify where interest turns into momentum — or falls away.' },
+    ],
     audiences: ['Service businesses with a considered sales process', 'Teams ready to improve follow-up and pipeline clarity'],
     technology: ['Forms, CRMs, email, and SMS workflows', 'Conversion and pipeline reporting'],
     outcomes: ['Cleaner handoffs', 'Less lead leakage', 'More visibility into the path from inquiry to sale'],
   },
   'AI & Automation': {
-    capabilities: [{ title: 'Opportunity mapping', body: 'Find repetitive work where an intelligent workflow can responsibly help.' }, { title: 'Human-centered automation', body: 'Keep review, judgment, and escalation visible where they matter.' }, { title: 'Operational handoff', body: 'Document systems so the team can understand and improve them.' }],
+    capabilities: [
+      { title: 'Opportunity mapping', body: 'Find repetitive work where an intelligent workflow can responsibly help.' },
+      { title: 'Human-centered automation', body: 'Keep review, judgment, and escalation visible where they matter.' },
+      { title: 'Operational handoff', body: 'Document systems so the team can understand and improve them.' },
+    ],
     audiences: ['Teams with repetitive customer or operational workflows', 'Businesses exploring practical AI use cases'],
     technology: ['AI-assisted workflows', 'CRM, support, and internal tool integrations'],
     outcomes: ['Faster routine work', 'More consistent responses', 'A clearer path from experiment to useful system'],
   },
   'Brand & Creative': {
-    capabilities: [{ title: 'Strategic clarity', body: 'Define what makes the business distinct and worth choosing.' }, { title: 'Visual expression', body: 'Build a flexible visual language that works across touchpoints.' }, { title: 'Creative production', body: 'Extend the system into the assets and campaigns the business actually needs.' }],
+    capabilities: [
+      { title: 'Strategic clarity', body: 'Define what makes the business distinct and worth choosing.' },
+      { title: 'Visual expression', body: 'Build a flexible visual language that works across touchpoints.' },
+      { title: 'Creative production', body: 'Extend the system into the assets and campaigns the business actually needs.' },
+    ],
     audiences: ['Businesses entering a new phase', 'Teams whose identity no longer matches their ambition'],
     technology: ['Flexible brand and design systems', 'Digital-first creative production'],
     outcomes: ['More confident communication', 'Stronger recognition', 'A system the team can use consistently'],
   },
   'Analytics & Optimization': {
-    capabilities: [{ title: 'Measurement planning', body: 'Define the events, funnels, and questions that matter to the business.' }, { title: 'Decision-ready reporting', body: 'Turn scattered activity into a concise view of what deserves attention.' }, { title: 'Experimentation', body: 'Create a prioritized backlog for learning and improvement.' }],
+    capabilities: [
+      { title: 'Measurement planning', body: 'Define the events, funnels, and questions that matter to the business.' },
+      { title: 'Decision-ready reporting', body: 'Turn scattered activity into a concise view of what deserves attention.' },
+      { title: 'Experimentation', body: 'Create a prioritized backlog for learning and improvement.' },
+    ],
     audiences: ['Teams making decisions from incomplete data', 'Businesses ready to move from reporting to learning'],
     technology: ['Analytics, dashboards, and event planning', 'Conversion and experiment frameworks'],
     outcomes: ['More trustworthy decisions', 'Shared performance language', 'A focused path to improvement'],
   },
 }
 
-export const services: Service[] = baseServices.map((service) => ({ ...service, ...disciplineContext[service.discipline] }))
+export const services: Service[] = baseServices.map((service) => ({
+  ...service,
+  href: `/services/${service.slug}`,
+  ...disciplineContext[service.discipline],
+}))
 
 export function getService(slug: string): Service | undefined {
   return services.find((s) => s.slug === slug)

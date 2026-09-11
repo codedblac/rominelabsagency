@@ -7,11 +7,13 @@ import { PageHero } from "@/components/shared/page-hero"
 import { CtaBand } from "@/components/shared/cta-band"
 import { BreadcrumbJsonLd } from "@/components/seo/json-ld"
 import { disciplines, services } from "@/lib/data/services"
-import { createMetadata } from '@/lib/seo'
+import { createMetadata } from "@/lib/seo"
+import { SERVICE_ROUTES } from "@/lib/routes"
 
 export const metadata: Metadata = createMetadata({
   title: "Services | Web, SEO, Social, Lead Gen, AI & Brand",
-  description: "Explore Romine Labs services across web development, SEO, paid media, social content, lead generation, AI automation, analytics, and brand strategy.",
+  description:
+    "Explore Romine Labs services across web development, SEO, paid media, social content, lead generation, AI automation, analytics, and brand strategy.",
   path: "/services",
 })
 
@@ -52,34 +54,51 @@ export default function ServicesPage() {
 
                 <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                   {linked.length > 0 ? (
-                    linked.map((s, i) => (
-                      <Reveal key={s.slug} delay={(i % 3) * 70}>
-                        <Link
-                          href={`/services/${s.slug}`}
-                          className="group flex h-full flex-col justify-between gap-6 rounded-xl border border-border bg-card p-6 transition-colors hover:border-brand/40 hover:bg-muted"
-                        >
-                          <div>
-                            <div className="flex items-start justify-between gap-3">
-                              <h3 className="font-serif text-lg text-foreground group-hover:text-brand">
-                                {s.title}
-                              </h3>
-                              <ArrowUpRight className="size-4 shrink-0 text-muted-foreground transition-all group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-brand" />
+                    linked.map((s, i) => {
+                      const href = SERVICE_ROUTES[s.title] ?? SERVICE_ROUTES[d.title] ?? `/services/${s.slug}`
+
+                      return (
+                        <Reveal key={s.slug} delay={(i % 3) * 70}>
+                          <Link
+                            href={href}
+                            className="group flex h-full flex-col justify-between gap-6 rounded-xl border border-border bg-card p-6 transition-colors hover:border-brand/40 hover:bg-muted"
+                          >
+                            <div>
+                              <div className="flex items-start justify-between gap-3">
+                                <h3 className="font-serif text-lg text-foreground group-hover:text-brand">
+                                  {s.title}
+                                </h3>
+                                <ArrowUpRight className="size-4 shrink-0 text-muted-foreground transition-all group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-brand" />
+                              </div>
+                              <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{s.summary}</p>
                             </div>
-                            <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{s.summary}</p>
-                          </div>
-                        </Link>
-                      </Reveal>
-                    ))
+                          </Link>
+                        </Reveal>
+                      )
+                    })
                   ) : (
                     <ul className="col-span-full flex flex-wrap gap-2">
-                      {d.services.map((name) => (
-                        <li
-                          key={name}
-                          className="rounded-full border border-border px-4 py-2 text-sm text-muted-foreground"
-                        >
-                          {name}
-                        </li>
-                      ))}
+                      {d.services.map((name) => {
+                        const href = SERVICE_ROUTES[name] ?? SERVICE_ROUTES[d.title]
+
+                        return href ? (
+                          <li key={name}>
+                            <Link
+                              href={href}
+                              className="inline-block rounded-full border border-border px-4 py-2 text-sm text-muted-foreground transition-colors hover:border-brand/40 hover:text-foreground"
+                            >
+                              {name}
+                            </Link>
+                          </li>
+                        ) : (
+                          <li
+                            key={name}
+                            className="rounded-full border border-border px-4 py-2 text-sm text-muted-foreground"
+                          >
+                            {name}
+                          </li>
+                        )
+                      })}
                     </ul>
                   )}
                 </div>

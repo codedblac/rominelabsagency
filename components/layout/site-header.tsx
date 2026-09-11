@@ -1,3 +1,4 @@
+// components/site-header.tsx
 'use client'
 
 import Link from 'next/link'
@@ -7,8 +8,8 @@ import { ArrowUpRight, ChevronRight, Menu, Plus, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { mainNav } from '@/lib/nav'
 import { disciplines } from '@/lib/data/services'
-import { subservices } from '@/lib/data/subservices'
 import { Logo } from './logo'
+import { SERVICE_ROUTES } from '@/lib/routes'
 
 export function SiteHeader() {
   const pathname = usePathname()
@@ -23,9 +24,6 @@ export function SiteHeader() {
   useEffect(() => {
     const evaluate = () => {
       setScrolled(window.scrollY > 12)
-      // A route can mark a full-bleed dark hero with [data-hero-dark].
-      // The transparent header uses light-on-dark styling while that hero
-      // still sits under the header band (top ~72px of the viewport).
       const hero = document.querySelector('[data-hero-dark]') as HTMLElement | null
       if (hero) {
         const rect = hero.getBoundingClientRect()
@@ -43,16 +41,13 @@ export function SiteHeader() {
     }
   }, [pathname])
 
-  // Light-on-dark treatment only while transparent AND sitting over a dark hero.
   const onDark = overHero && !scrolled
 
-  // Close menus on route change
   useEffect(() => {
     setMenuOpen(false)
     setServicesOpen(false)
   }, [pathname])
 
-  // Lock scroll when mobile menu open
   useEffect(() => {
     document.body.style.overflow = menuOpen ? 'hidden' : ''
     return () => {
@@ -64,9 +59,13 @@ export function SiteHeader() {
     if (closeTimer.current) clearTimeout(closeTimer.current)
     setServicesOpen(true)
   }
+
   const scheduleClose = () => {
     if (closeTimer.current) clearTimeout(closeTimer.current)
-    closeTimer.current = setTimeout(() => setServicesOpen(false), 120)
+    closeTimer.current = setTimeout(() => {
+      setServicesOpen(false)
+      setExpandedDiscipline(null)
+    }, 120)
   }
 
   return (
@@ -92,6 +91,7 @@ export function SiteHeader() {
               : onDark
                 ? 'text-ink-foreground/80 hover:text-ink-foreground'
                 : 'text-foreground/80 hover:text-foreground'
+
             if (link.label === 'Services') {
               return (
                 <div
@@ -112,25 +112,84 @@ export function SiteHeader() {
                   >
                     {link.label}
                   </Link>
-                  <div className={cn('absolute left-0 top-[calc(100%+4px)] z-30 hidden lg:block', servicesOpen ? 'pointer-events-auto' : 'pointer-events-none')}>
-                    <div className={cn('relative w-64 rounded-xl border border-border bg-background/95 p-1.5 shadow-xl backdrop-blur-xl transition-all duration-200', servicesOpen ? 'translate-y-0 opacity-100' : '-translate-y-1 opacity-0')}>
-                      {disciplines.map((d) => (
-                        <div key={d.id} className="relative">
-                          <Link href={`/services/${d.primarySlug}`} onMouseEnter={(event) => { setExpandedDiscipline(d.id); setSubmenuSide(event.currentTarget.getBoundingClientRect().right + 304 < window.innerWidth ? 'right' : 'left') }} className={cn('flex items-center justify-between rounded-lg px-3 py-2 text-sm font-medium transition-colors hover:bg-muted', expandedDiscipline === d.id && 'bg-muted text-brand')}>
-                            <span>{d.title}</span><ChevronRight className="size-3.5 text-muted-foreground" />
-                          </Link>
-                          {expandedDiscipline === d.id ? (
-                            <div onMouseEnter={openServices} className={cn('absolute top-0 z-10 w-72 rounded-xl border border-border bg-background/95 p-1.5 shadow-xl backdrop-blur-xl', submenuSide === 'right' ? 'left-full ml-2' : 'right-full mr-2')}>
-                              {d.services.map((service) => { const match = subservices.find((item) => item.title.toLowerCase() === service.toLowerCase()); return <Link key={service} href={match ? `/services/specialties/${match.slug}` : `/services/${d.primarySlug}`} className="block rounded-lg px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-brand">{service}</Link> })}
-                            </div>
-                          ) : null}
-                        </div>
-                      ))}
+
+                  {/* Desktop Services Dropdown */}
+                  <div
+                    className={cn(
+                      'absolute left-0 top-[calc(100%+4px)] z-30 hidden lg:block',
+                      servicesOpen ? 'pointer-events-auto' : 'pointer-events-none'
+                    )}
+                  >
+                    <div
+                      className={cn(
+                        'relative w-64 rounded-xl border border-border bg-background/95 p-1.5 shadow-xl backdrop-blur-xl transition-all duration-200',
+                        servicesOpen ? 'translate-y-0 opacity-100' : '-translate-y-1 opacity-0'
+                      )}
+                    >
+                      {disciplines.map((d) => {
+                        const serviceNames = (d.services || []).filter(Boolean)
+                        const hasSubservices = serviceNames.length > 0
+
+                        return (
+                          <div key={d.id} className="relative">
+                            <Link
+                              href={`/services/${d.primarySlug}`}
+                              onMouseEnter={(event) => {
+                                if (hasSubservices) {
+                                  setExpandedDiscipline(d.id)
+                                  setSubmenuSide(
+                                    event.currentTarget.getBoundingClientRect().right + 304 < window.innerWidth
+                                      ? 'right'
+                                      : 'left'
+                                  )
+                                } else {
+                                  setExpandedDiscipline(null)
+                                }
+                              }}
+                              className={cn(
+                                'flex items-center justify-between rounded-lg px-3 py-2 text-sm font-medium transition-colors hover:bg-muted',
+                                expandedDiscipline === d.id && 'bg-muted text-brand'
+                              )}
+                            >
+                              <span>{d.title}</span>
+                              {hasSubservices && (
+                                <ChevronRight className="size-3.5 text-muted-foreground" />
+                              )}
+                            </Link>
+
+                            {/* Flyout Submenu */}
+                            {hasSubservices && expandedDiscipline === d.id ? (
+                              <div
+                                onMouseEnter={openServices}
+                                className={cn(
+                                  'absolute top-0 z-10 w-72 rounded-xl border border-border bg-background/95 p-1.5 shadow-xl backdrop-blur-xl',
+                                  submenuSide === 'right' ? 'left-full ml-2' : 'right-full mr-2'
+                                )}
+                              >
+                                {serviceNames.map((name) => {
+                                  const targetHref = SERVICE_ROUTES[name] || `/services/${d.primarySlug}`
+
+                                  return (
+                                    <Link
+                                      key={name}
+                                      href={targetHref}
+                                      className="block rounded-lg px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-brand"
+                                    >
+                                      {name}
+                                    </Link>
+                                  )
+                                })}
+                              </div>
+                            ) : null}
+                          </div>
+                        )
+                      })}
                     </div>
                   </div>
                 </div>
               )
             }
+
             return (
               <Link
                 key={link.href}
@@ -175,8 +234,12 @@ export function SiteHeader() {
         </div>
       </div>
 
-      {/* Mobile menu */}
-      <MobileMenu open={menuOpen} onClose={() => setMenuOpen(false)} pathname={pathname} />
+      {/* Mobile Menu */}
+      <MobileMenu
+        open={menuOpen}
+        onClose={() => setMenuOpen(false)}
+        pathname={pathname}
+      />
     </header>
   )
 }
@@ -192,6 +255,7 @@ function MobileMenu({
 }) {
   const [servicesExpanded, setServicesExpanded] = useState(false)
   const [expandedCategory, setExpandedCategory] = useState<string | null>(null)
+
   return (
     <div
       className={cn(
@@ -255,17 +319,57 @@ function MobileMenu({
                         />
                       </button>
                     </div>
+
                     {servicesExpanded ? (
                       <ul className="mb-2 mt-1 flex flex-col gap-1 border-l border-border pl-4">
-                        {disciplines.map((d) => (
-                          <li key={d.id}>
-                            <div className="flex items-center justify-between gap-3">
-                              <Link href={`/services/${d.primarySlug}`} className="block py-2 text-sm font-medium text-foreground">{d.title}</Link>
-                              <button type="button" aria-label={`${expandedCategory === d.id ? 'Collapse' : 'Expand'} ${d.title}`} aria-expanded={expandedCategory === d.id} onClick={() => setExpandedCategory(expandedCategory === d.id ? null : d.id)} className="px-2 py-2 text-muted-foreground">{expandedCategory === d.id ? '↓' : '→'}</button>
-                            </div>
-                            {expandedCategory === d.id ? <ul className="mb-2 ml-3 flex flex-col gap-1 border-l border-border pl-3">{d.services.map((service) => { const match = subservices.find((item) => item.title.toLowerCase() === service.toLowerCase()); return <li key={service}><Link href={match ? `/services/specialties/${match.slug}` : `/services/${d.primarySlug}`} className="block py-1.5 text-xs text-muted-foreground hover:text-brand">{service}</Link></li> })}</ul> : null}
-                          </li>
-                        ))}
+                        {disciplines.map((d) => {
+                          const serviceNames = (d.services || []).filter(Boolean)
+                          const hasSubservices = serviceNames.length > 0
+
+                          return (
+                            <li key={d.id}>
+                              <div className="flex items-center justify-between gap-3">
+                                <Link 
+                                  href={`/services/${d.primarySlug}`} 
+                                  className="block py-2 text-sm font-medium text-foreground"
+                                >
+                                  {d.title}
+                                </Link>
+                                {hasSubservices && (
+                                  <button
+                                    type="button"
+                                    aria-label={`${expandedCategory === d.id ? 'Collapse' : 'Expand'} ${d.title}`}
+                                    aria-expanded={expandedCategory === d.id}
+                                    onClick={() =>
+                                      setExpandedCategory(expandedCategory === d.id ? null : d.id)
+                                    }
+                                    className="px-2 py-2 text-muted-foreground"
+                                  >
+                                    {expandedCategory === d.id ? '↓' : '→'}
+                                  </button>
+                                )}
+                              </div>
+
+                              {hasSubservices && expandedCategory === d.id ? (
+                                <ul className="mb-2 ml-3 flex flex-col gap-1 border-l border-border pl-3">
+                                  {serviceNames.map((name) => {
+                                    const targetHref = SERVICE_ROUTES[name] || `/services/${d.primarySlug}`
+                                    return (
+                                      <li key={name}>
+                                        <Link
+                                          href={targetHref}
+                                          className="block py-1.5 text-xs text-muted-foreground hover:text-brand"
+                                        >
+                                          {name}
+                                        </Link>
+                                      </li>
+                                    )
+                                  })}
+                                </ul>
+                              ) : null}
+                            </li>
+                          )
+                        })}
                       </ul>
                     ) : null}
                   </li>
