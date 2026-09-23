@@ -219,22 +219,24 @@ export function SiteHeader() {
             Let&apos;s Talk
             <ArrowUpRight className="size-4" />
           </Link>
+
+          {/* Mobile Menu Toggle Button */}
           <button
             type="button"
-            aria-label="Open menu"
+            aria-label={menuOpen ? 'Close menu' : 'Open menu'}
             aria-expanded={menuOpen}
-            onClick={() => setMenuOpen(true)}
+            onClick={() => setMenuOpen((prev) => !prev)}
             className={cn(
-              'inline-flex size-10 items-center justify-center rounded-full border lg:hidden',
+              'inline-flex size-10 items-center justify-center rounded-full border lg:hidden transition-colors',
               onDark ? 'border-ink-border text-ink-foreground' : 'border-border text-foreground',
             )}
           >
-            <Menu className="size-5" />
+            {menuOpen ? <X className="size-5" /> : <Menu className="size-5" />}
           </button>
         </div>
       </div>
 
-      {/* Mobile Menu */}
+      {/* Mobile Menu Overlay */}
       <MobileMenu
         open={menuOpen}
         onClose={() => setMenuOpen(false)}
@@ -256,14 +258,23 @@ function MobileMenu({
   const [servicesExpanded, setServicesExpanded] = useState(false)
   const [expandedCategory, setExpandedCategory] = useState<string | null>(null)
 
+  // Reset internal accordion states whenever the menu closes
+  useEffect(() => {
+    if (!open) {
+      setServicesExpanded(false)
+      setExpandedCategory(null)
+    }
+  }, [open])
+
   return (
     <div
       className={cn(
-        'fixed inset-0 z-50 lg:hidden',
-        open ? 'pointer-events-auto' : 'pointer-events-none',
+        'fixed inset-0 z-50 lg:hidden transition-all duration-300',
+        open ? 'visible pointer-events-auto' : 'invisible pointer-events-none',
       )}
       aria-hidden={!open}
     >
+      {/* Backdrop */}
       <div
         className={cn(
           'absolute inset-0 bg-foreground/40 backdrop-blur-sm transition-opacity duration-300',
@@ -271,36 +282,40 @@ function MobileMenu({
         )}
         onClick={onClose}
       />
+
+      {/* Slide-out Drawer */}
       <div
         className={cn(
-          'absolute inset-y-0 right-0 flex w-full max-w-sm flex-col bg-background shadow-2xl transition-transform duration-300',
+          'absolute inset-y-0 right-0 flex w-full max-w-sm h-dvh flex-col bg-background shadow-2xl transition-transform duration-300 ease-in-out',
           open ? 'translate-x-0' : 'translate-x-full',
         )}
         role="dialog"
         aria-modal="true"
         aria-label="Menu"
       >
-        <div className="flex h-16 items-center justify-between border-b border-border px-5">
+        <div className="flex h-16 shrink-0 items-center justify-between border-b border-border px-5">
           <Logo />
           <button
             type="button"
             aria-label="Close menu"
             onClick={onClose}
-            className="inline-flex size-10 items-center justify-center rounded-full border border-border"
+            className="inline-flex size-10 items-center justify-center rounded-full border border-border text-foreground hover:bg-muted"
           >
             <X className="size-5" />
           </button>
         </div>
+
         <nav aria-label="Mobile" className="flex-1 overflow-y-auto px-5 py-6">
           <ul className="flex flex-col gap-1">
             {mainNav.map((link) => {
               if (link.label === 'Services') {
                 return (
-                  <li key={link.href}>
-                    <div className="flex items-center justify-between">
+                  <li key={link.href} className="py-1">
+                    <div className="flex items-center justify-between min-h-[44px]">
                       <Link
                         href={link.href}
-                        className="py-3 text-lg font-medium text-foreground"
+                        onClick={onClose}
+                        className="py-2 text-lg font-medium text-foreground hover:text-brand"
                       >
                         Services
                       </Link>
@@ -309,56 +324,64 @@ function MobileMenu({
                         aria-label={servicesExpanded ? 'Collapse services' : 'Expand services'}
                         aria-expanded={servicesExpanded}
                         onClick={() => setServicesExpanded((v) => !v)}
-                        className="inline-flex size-9 items-center justify-center rounded-full border border-border"
+                        className="inline-flex size-10 items-center justify-center rounded-full border border-border text-foreground transition-colors hover:bg-muted"
                       >
                         <Plus
                           className={cn(
-                            'size-4 transition-transform',
+                            'size-4 transition-transform duration-200',
                             servicesExpanded && 'rotate-45',
                           )}
                         />
                       </button>
                     </div>
 
-                    {servicesExpanded ? (
-                      <ul className="mb-2 mt-1 flex flex-col gap-1 border-l border-border pl-4">
+                    {servicesExpanded && (
+                      <ul className="mb-2 mt-2 flex flex-col gap-1 border-l border-border pl-4">
                         {disciplines.map((d) => {
                           const serviceNames = (d.services || []).filter(Boolean)
                           const hasSubservices = serviceNames.length > 0
+                          const isCategoryExpanded = expandedCategory === d.id
 
                           return (
                             <li key={d.id}>
-                              <div className="flex items-center justify-between gap-3">
-                                <Link 
-                                  href={`/services/${d.primarySlug}`} 
-                                  className="block py-2 text-sm font-medium text-foreground"
+                              <div className="flex items-center justify-between gap-3 min-h-[40px]">
+                                <Link
+                                  href={`/services/${d.primarySlug}`}
+                                  onClick={onClose}
+                                  className="block py-2 text-sm font-medium text-foreground hover:text-brand"
                                 >
                                   {d.title}
                                 </Link>
                                 {hasSubservices && (
                                   <button
                                     type="button"
-                                    aria-label={`${expandedCategory === d.id ? 'Collapse' : 'Expand'} ${d.title}`}
-                                    aria-expanded={expandedCategory === d.id}
+                                    aria-label={`${isCategoryExpanded ? 'Collapse' : 'Expand'} ${d.title}`}
+                                    aria-expanded={isCategoryExpanded}
                                     onClick={() =>
-                                      setExpandedCategory(expandedCategory === d.id ? null : d.id)
+                                      setExpandedCategory(isCategoryExpanded ? null : d.id)
                                     }
-                                    className="px-2 py-2 text-muted-foreground"
+                                    className="inline-flex size-9 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground"
                                   >
-                                    {expandedCategory === d.id ? '↓' : '→'}
+                                    <ChevronRight
+                                      className={cn(
+                                        'size-4 transition-transform duration-200',
+                                        isCategoryExpanded && 'rotate-90',
+                                      )}
+                                    />
                                   </button>
                                 )}
                               </div>
 
-                              {hasSubservices && expandedCategory === d.id ? (
-                                <ul className="mb-2 ml-3 flex flex-col gap-1 border-l border-border pl-3">
+                              {hasSubservices && isCategoryExpanded && (
+                                <ul className="mb-2 ml-2 flex flex-col gap-1 border-l border-border pl-3">
                                   {serviceNames.map((name) => {
                                     const targetHref = SERVICE_ROUTES[name] || `/services/${d.primarySlug}`
                                     return (
                                       <li key={name}>
                                         <Link
                                           href={targetHref}
-                                          className="block py-1.5 text-xs text-muted-foreground hover:text-brand"
+                                          onClick={onClose}
+                                          className="block py-1.5 text-xs text-muted-foreground transition-colors hover:text-brand"
                                         >
                                           {name}
                                         </Link>
@@ -366,23 +389,25 @@ function MobileMenu({
                                     )
                                   })}
                                 </ul>
-                              ) : null}
+                              )}
                             </li>
                           )
                         })}
                       </ul>
-                    ) : null}
+                    )}
                   </li>
                 )
               }
+
               const active = pathname === link.href || pathname.startsWith(`${link.href}/`)
               return (
                 <li key={link.href}>
                   <Link
                     href={link.href}
+                    onClick={onClose}
                     className={cn(
-                      'block py-3 text-lg font-medium',
-                      active ? 'text-brand' : 'text-foreground',
+                      'block py-3 text-lg font-medium transition-colors',
+                      active ? 'text-brand' : 'text-foreground hover:text-brand',
                     )}
                   >
                     {link.label}
@@ -392,10 +417,12 @@ function MobileMenu({
             })}
           </ul>
         </nav>
-        <div className="border-t border-border p-5">
+
+        <div className="shrink-0 border-t border-border p-5">
           <Link
             href="/contact"
-            className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-full bg-brand text-sm font-medium text-primary-foreground"
+            onClick={onClose}
+            className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-full bg-brand text-sm font-medium text-primary-foreground transition-colors hover:bg-brand/90"
           >
             Let&apos;s Talk
             <ArrowUpRight className="size-4" />
